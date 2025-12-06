@@ -1,3 +1,4 @@
+#Feito por Kayo Dev1
 producao = []
 
 def cadastrar_producao():
@@ -19,6 +20,8 @@ producao.append(registro)
 print("\n Produção cadastrada com sucesso! ")
 
 producoes = []
+
+#Feito por Kayo Dev1
 
 def calcular_total_semanal():
   if not producoes:
@@ -44,3 +47,74 @@ if total == 0:
   print('\n Nenhuma produção cadastrada para a semana {semana}.')
 else:
   print:(f'\n Total produzido na semana {semana}: {total} unidades.')
+
+#Feito por Kayo Dev1
+
+def calcular_media_por_dia():
+  if not producao:
+    print("\nNenhuma produção cadastrada ainda.")
+    return
+  
+  print("\n === CALCULAR MÈDIA POR DIA ===")
+  dia = input("Digite o dia em que deseja consultar (ex: 12/03/2025): ")
+  total = 0
+  contagem = 0
+  
+  for prod in producao:
+    if prod['dia'] == dia:
+     total += prod['quantidade']
+    contagem += 1
+
+  if contagem == 0:
+    print(f"\nNenhuma produção cadastrada para o dia {dia}.")
+    return
+  
+  media = total / contagem
+  print(f"\nA média de produção no dia {dia} foi de `{media:.2f} unidades.")
+  return
+
+
+#Feito por Kayo Dev1
+
+def calcular_media_por_turno():
+  if not producao:
+    print('\nNenhuma produção cadastrada ainda.')
+    return
+  
+  print('\n ---CALCULAR MÉDIA POR TURNO ---')
+  turno = input('Digiteo turno (manhã / tarde / noite): ').lower
+
+  #Fltrar produções do turno escolhido
+  producoes_turno = [prod['quantidade'] for prod in producao if prod ['turno'].lower() == turno]
+
+  if not producoes_turno:
+    print(f"Nenhuma produção encontrada para o turno '{turno}'.")
+    return
+  
+  media = sum(producoes_turno) / len(producoes_turno)
+
+  print(f"\nA média de produção no turno '{turno}' é: {media:.2f}")
+
+def simular_mensal_anual():
+  if not producao:
+    print('\n Nenhuma produção cadastrada ainda.')
+    return
+  
+  print('\n ---SIMULAÇÂO MENSAL E ANUAL ---')
+
+  #pega somente as quantidades registradas
+  quantidades = [prod['quantidade'] for prod in producao]
+
+  #Calcular média geral
+  media_geral = sum(quantidades) / len(quantidades)
+
+  #simulações
+  simulacão_mensal = media_geral * 30 #aqui eu to supondo que seja 30 dias
+
+  simulação_anual = media_geral *365 #supondo 365 dias
+
+  print(f"\nMédia diária geral:{media_geral:.2f}")
+  print(f"\nProdução estimada menstal (30 dias): {simulacão_mensal:.2f}")
+  print(f"\nProdução estimada anual (365 dias): {simulação_anual:.2f}")
+
+  
