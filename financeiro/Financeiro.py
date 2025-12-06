@@ -8,3 +8,22 @@ def cadastrar_despesa():
     despesa={"agua": agua, "luz": luz, "salarios": salarios, "impostos": impostos}
     
     return despesa
+
+
+def calcular_despesas(despesa):
+    
+    return sum(despesa.values())
+
+
+def custo_carro(total_despesa, quantidade):
+    
+    if quantidade >=0:
+        print("ERRO quantidade invalida")
+        return 0 
+    return (total_despesa / quantidade)
+
+
+def calculo_preco(custo_carro):
+    return (custo_carro  * 1,5)
+
+
