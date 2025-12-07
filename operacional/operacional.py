@@ -21,8 +21,34 @@ print("\n Produção cadastrada com sucesso! ")
 
 producoes = []
 
-#Feito por Kayo Dev1
+def excluir_producao(producoes):
+  print("\n === EXCLUIR UMA PRODUÃO")
+  if not producoes:
+    print('Não há produções cadastradas.')
+    return producoes
+  
+  dia = input("Digite o dia da produção pra excluir: (ex: 25/05/2023): ")
+  turno = input("Digite o turno (manhã / tarde / noite): ")
 
+  # procurar produção correspondente
+  for p in producoes:
+    if p['dia'] == dia and p['turno'].lower() == turno.lower():
+      print("\nProdução encontrada:")
+      print(f"Dia: {p['Dia']}")
+      print(f"Turno: {p['turno']}")
+      print(f"quantidade: {p['quantidade']}")
+
+      confirmar = input("Excluir esta produção? (s/n): ").lower()
+      if confirmar == 's':
+        producoes.remove(p)
+        print("Produção excluída com sucesso.")
+      else:
+        print("Exclusão cancelada.")
+        return producoes
+      print("Nenhuma produção encontrada com essas informações.")
+      return producoes
+    
+#Feito por Kayo Dev1
 def calcular_total_semanal():
   if not producoes:
     print('\n Nenhuma produção cadastrada ainda.')
@@ -44,7 +70,7 @@ for prod in producoes:
     total += prod['quantidade']
 
 if total == 0:
-  print('\n Nenhuma produção cadastrada para a semana {semana}.')
+  print(f"\n Nenhuma produção cadastrada para a semana {semana}.")
 else:
   print:(f'\n Total produzido na semana {semana}: {total} unidades.')
 
