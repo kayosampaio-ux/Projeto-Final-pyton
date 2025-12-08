@@ -143,4 +143,64 @@ def simular_mensal_anual():
   print(f"\nProdução estimada menstal (30 dias): {simulacão_mensal:.2f}")
   print(f"\nProdução estimada anual (365 dias): {simulação_anual:.2f}")
 
+def calcular_producao_ideal(producao):
+  if not producao:
+    print("Nenhuma produção cadastrada para calcular a produção ideal!")
+    return
   
+total = 0
+dias_contados = 0
+
+for dia in producao:
+ for turno in producao[dia]:
+   total += producao[dia][turno]
+   dias_contados += 1
+
+media_diaria = total / dias_contados
+producao_ideal = media_diaria * 7
+
+print("\n===== PRODUÇÃO IDEAL=====")
+print(f"Média diária real: {media_diaria:.2f} unidades")
+print(f"Produção ideal estimada (1 semana): {producao_ideal:.2f} unidades")
+
+def gerar_relatorio(producao):
+  if not producao:
+    print("Nenhuma produção cadastrada! O relatório não pode ser gerado.")
+    return
+  print("\n================RELATÓRIO DE PRODUÇÃO =================")
+
+  total_geral = 0
+  dias_contados = 0
+  turno_soma = {"manha": 0, "tarde": 0, "noite": 0}
+  turnos_contagem = {"manha": 0, "tarde": 0, "noite": 0}
+
+  for dia in producao:
+    print("f\n DIA: {dia}")
+    dias_contados += 1
+
+  for turno in producao[dia]:
+    quantidade = producao[dia] [turno]
+    print(f"{turno.captalize()}: {quantidade} Unidades.")
+
+    total_geral += quantidade
+    turno_soma[turno] += quantidade
+    turnos_contagem[turno] += 1
+
+    media_diaria = total_geral / dias_contados
+
+    media_turno = {}
+    for turno in turno_soma:
+      if turnos_contagem[turno] > 0:
+        media_turno[turno] = turno_soma[turno] / turnos_contagem[turno]
+      else:
+        media_turno[turno] = 0
+
+        print("\n ==================RESUMO FINAL=================")
+        print(f"Total produzido: {total_geral} unidades")
+        print(f"Média por dia:{media_diaria:.2f} unidades")
+        
+        print("\nMédia por turno:")
+        for turno in media_turno:
+          print(f" - {turno.capitalize()}: {media_turno[turno]:.2f} unidades")
+
+          print("\n===============================================================")
