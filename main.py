@@ -1,16 +1,13 @@
+# main.py — Sistema integrado (versão compatível com os arquivos que você subiu)
 
-# MAIN DO SISTEMA INTEGRADO
-
-
-# Importa funções dos módulos
+# IMPORTS (use os nomes reais dos arquivos que estão na sua pasta)
 from operacional.operacional import (
     cadastrar_producao,
     excluir_producao,
     calcular_total_semanal,
     calcular_media_por_dia,
     calcular_media_por_turno,
-    simular_mensal_anual,
-    
+    simular_mensal_anual
 )
 
 from estoque.Estoque import (
@@ -32,11 +29,14 @@ from financeiro.Financeiro import (
     excluir_despesa
 )
 
-# Banco de dados central
-producoes = []         # vindo do Operacional
-produtos = {}          # vindo do Estoque
-despesas = {}          # vindo do Financeiro
 
+# Bancos de dados compartilhados do MAIN
+# Nota: o módulo operacional guarda sua própria lista interna de produções.
+produtos = []   # lista que passamos para funções do estoque
+despesas = {}   # dicionário passado para o financeiro
+
+
+# ===== Menus por módulo =====
 
 def menu_operacional():
     while True:
@@ -73,62 +73,80 @@ def menu_estoque():
     while True:
         print("\n==== MÓDULO ESTOQUE ====")
         print("1 - Cadastrar produto")
-        print("2 - Atualizar produto")
-        print("3 - Excluir produto")
-        print("4 - Calcular custo total dos produtos")
-        print("5 - Calcular custos integrados ao Operacional")
-        print("6 - Voltar")
+        print("2 - Pesquisar produto")
+        print("3 - Calcular custos (por código)")
+        print("4 - Mostrar todos (máx.10)")
+        print("5 - Alterar produto")
+        print("6 - Excluir produto")
+        print("7 - Voltar")
 
         opc = input("Escolha: ")
 
         if opc == "1":
             cadastrar_produto(produtos)
         elif opc == "2":
-            atualizar_produto(produtos)
+            pesquisar(produtos)
         elif opc == "3":
-            excluir_produto(produtos)
+            # calcular_custos no seu módulo pede o código e retorna um dict
+            resultado = calcular_custos(produtos)
+            # a função calcular_custos já imprime os custos pelo que vi, mas ficamos seguros:
+            if resultado is None:
+                print("Cálculo não realizado (produto não encontrado).")
         elif opc == "4":
-            calcular_custo_total_produtos(produtos)
+            mostrar_todos(produtos)
         elif opc == "5":
-            calcular_custos_integrado(produtos, producoes)
+            alterar_produto(produtos)
         elif opc == "6":
+            excluir_produto(produtos)
+        elif opc == "7":
             return
         else:
             print("Opção inválida.")
 
 
 def menu_financeiro():
+    global despesas
     while True:
         print("\n==== MÓDULO FINANCEIRO ====")
         print("1 - Cadastrar despesas")
         print("2 - Gerar relatório financeiro")
-        print("3 - Voltar")
+        print("3 - Adicionar/Alterar despesa")
+        print("4 - Excluir/Resetar despesas")
+        print("5 - Voltar")
 
         opc = input("Escolha: ")
 
         if opc == "1":
-            global despesas
             despesas = cadastrar_despesa()
         elif opc == "2":
             if not despesas:
                 print("Nenhuma despesa cadastrada.")
             else:
-                qtd = int(input("Quantidade total de carros produzidos no mês: "))
+                # pedir número de carros para cálculo (o professor pede 1000 pallets, mas o dev pede carros)
+                qtd = int(input("Quantidade total de carros produzidos no mês (ex: 1000): "))
                 gerar_relatorio(despesas, qtd)
         elif opc == "3":
+            if not despesas:
+                print("Nenhuma despesa cadastrada. Use a opção 1 para cadastrar.")
+            else:
+                despesas = adicionar_despesa(despesas)
+        elif opc == "4":
+            if not despesas:
+                print("Nenhuma despesa cadastrada.")
+            else:
+                despesas = excluir_despesa(despesas)
+        elif opc == "5":
             return
         else:
             print("Opção inválida.")
 
 
-# FUTURO MÓDULO RH — já preparado
 def menu_rh():
     print("\n=== MÓDULO RH ===")
-    print("Ainda será integrado quando o Dev terminar o módulo.")
+    print("Módulo RH será integrado depois. Quando chegar, eu conecto aqui.")
 
 
-# === MAIN PRINCIPAL ===
-
+# ===== MAIN =====
 def main():
     while True:
         print("\n==============================")
@@ -157,4 +175,5 @@ def main():
             print("Opção inválida.")
 
 
-main()
+if __name__ == "__main__":
+    main()
