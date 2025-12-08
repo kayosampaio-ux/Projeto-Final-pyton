@@ -130,3 +130,5 @@ def simular_mensal_anual():
     print(f"Média diária geral: {media_geral:.2f}")
     print(f"Produção estimada mensal: {simulacao_mensal:.2f}")
     print(f"Produção estimada anual: {simulacao_anual:.2f}")
+
+

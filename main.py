@@ -3,31 +3,34 @@
 
 
 # Importa funções dos módulos
-from operacional import (
+from operacional.operacional import (
     cadastrar_producao,
     excluir_producao,
     calcular_total_semanal,
     calcular_media_por_dia,
     calcular_media_por_turno,
-    simular_mensal_anual
+    simular_mensal_anual,
+    
 )
 
-from estoque import (
+from estoque.Estoque import (
     cadastrar_produto,
-    excluir_produto,
-    atualizar_produto,
-    calcular_custo_total_produtos,
-    calcular_custos_integrado
+    pesquisar,
+    calcular_custos,
+    mostrar_todos,
+    alterar_produto,
+    excluir_produto
 )
 
-from financeiro import (
+from financeiro.Financeiro import (
     cadastrar_despesa,
     calcular_despesas,
     custo_por_carro,
     calculo_preco,
-    gerar_relatorio
+    gerar_relatorio,
+    adicionar_despesa,
+    excluir_despesa
 )
-
 
 # Banco de dados central
 producoes = []         # vindo do Operacional
