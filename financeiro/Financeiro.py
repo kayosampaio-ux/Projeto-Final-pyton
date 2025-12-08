@@ -1,5 +1,5 @@
 # financeiro.py
-# Autor: Davi
+# DEV 3 : Davi
 # Objetivo: Calcular despesas, custo e preço de venda dos carros. 
 
  # === MÓDULO FINANCEIRO ===
