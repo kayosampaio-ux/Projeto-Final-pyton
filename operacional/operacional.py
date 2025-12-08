@@ -3,25 +3,29 @@
 producao = []
 
 
+from datetime import datetime
+
 def cadastrar_producao():
-    print("\n--- Cadastro de Produção ---")
+    while True:
+        data = input("Digite a data (DD.MM.AAAA): ")
+        try:
+            # Tenta converter a string em data
+            dia, mes, ano = map(int, data.split("."))
+            data_obj = datetime(ano, mes, dia)
+            break  # data válida
+        except ValueError:
+            print("Data inválida! Verifique o dia ou o mês.")
+
+    turnos_validos = ["manhã", "tarde", "noite"]
+    while True:
+        turno = input("Digite o turno (manhã, tarde, noite): ").lower()
+        if turno in turnos_validos:
+            break
+        else:
+            print("Turno inválido! Apenas 'manhã', 'tarde' ou 'noite' são permitidos.")
+
+    print(f"Produção cadastrada com sucesso: {data_obj.strftime('%d.%m.%Y')} - Turno: {turno}")
     
-    dia = input("Digite o dia (ex: 12/03/2025): ")
-    turno = input("Digite o turno (manhã / tarde / noite): ").lower()
-    quantidade = int(input("Digite a quantidade produzida: "))
-    semana = int(input("Digite o número da semana: "))
-
-    registro = {
-        "dia": dia,
-        "turno": turno,
-        "quantidade": quantidade,
-        "semana": semana
-    }
-
-    producao.append(registro)
-    print("\nProdução cadastrada com sucesso!")
-
-
 def excluir_producao():
     print("\n=== EXCLUIR UMA PRODUÇÃO ===")
 
