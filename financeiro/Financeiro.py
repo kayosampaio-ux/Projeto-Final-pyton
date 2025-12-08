@@ -93,3 +93,40 @@ def excluir_despesa(despesas):
     return despesas
 
 
+<<<<<<< HEAD
+=======
+    
+def menu():
+    despesas = {}
+    qtd_carros = 0
+    
+    while True:
+        print("====Menu Financeiro====")
+        print("1 - cadastrar despesa")
+        print("2 - gerar relatorio")
+        print("3 - excluir e adicionar")
+        print("4 - sair")
+        opcao = input("Escolha uma opção: ")
+        
+        if opcao == "1":
+            despesas = cadastrar_despesa()
+            qtd_carros = int(input("Quantidade de carros produzidos por mês: "))
+            print("despesa cadastrada")
+            
+        elif opcao == "2":
+            if not despesas:
+                print("despesa não cadastrada.")
+            else:
+                gerar_relatorio(despesas, qtd_carros)
+        elif opcao=="3":
+            if not despesas:
+                print("despesa nao cadastrada ")
+            else:
+                despesas = excluir_despesa(despesas)    
+        
+        elif opcao == "4":
+            print("sair")
+            break
+        else:
+            print("opção invalida")
+>>>>>>> 8daae0b288eb371cd8e95dcb10762a1787e930b3
