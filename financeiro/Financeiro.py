@@ -1,109 +1,166 @@
+# financeiro.py
+# DEV 3 : Davi
+# Objetivo: Calcular despesas, custo e preço de venda dos carros. 
+
+import os, json
+ARQUIVO = "database/financeiro.json"
+
+"""Garante que o arquivo e pasta existam"""
+def garantir_arquivo():
+    os.makedirs("database", exist_ok=True)
+    if not os.path.exists(ARQUIVO):
+        with open(ARQUIVO, "w", encoding="utf-8") as f:
+            json.dump({"despesas": [], "producao": []}, f, indent=2)
+
+"""Carrega o dicionário financeiro"""
+def carregar():
+    garantir_arquivo()
+    with open(ARQUIVO, "r", encoding="utf-8") as f:
+        return json.load(f)
+
+"""Salva o dicionário atualizado"""
+def salvar(dados):
+    with open(ARQUIVO, "w", encoding="utf-8") as f:
+        json.dump(dados, f, indent=2, ensure_ascii=False)
+
 def cadastrar_despesa():
-    print("===cadastro de despesa===")
-    agua = float(input("gasto com agua: "))
-    luz = float(input("gasto com luz: "))
-    salarios = float(input("gasto com salarios: "))
-    impostos = float(input("gasto com impostos: "))
+    financeiro = carregar()
+    print("=== Cadastrar Despesa ===")
+    tipo = input("Tipo (agua/luz/compra/folha/outros): ").strip()
     
-    despesa={"agua": agua, "luz": luz, "salarios": salarios, "impostos": impostos}
-    
-    return despesa
-
-
-def calcular_despesas(despesa):
-    
-    return sum(despesa.values())
-
-
-def custo_por_carro(total_despesa, quantidade):
-    
-    if quantidade <=0:
-        print("ERRO quantidade invalida")
-        return 0 
-    return (total_despesa / quantidade)
-
-
-def calculo_preco(custo_carro):
-    return (custo_carro  * 1.5)
-
-def gerar_relatorio(despesa, qtd_carro):
-    print("===Relatorio Financeiro===")
-    total = calcular_despesas(despesa)
-    custo_unidade = custo_por_carro(total, qtd_carro)
-    preco_final = calculo_preco(custo_unidade)
-    
-    print(f"total de despesa: R$ {total:.2f}")
-    print(f"custo por carro: R$ {custo_unidade:.2f}")
-    print(f"preco final de venda: R$ {preco_final:.2f}")
-
-def adicionar_despesa(despesas):
-    nome = input("nome da despesa (agua, luz, salarios,impostos): ").lower()
-    
-    if nome not in ["agua", "luz", "salarios", "impostos"]:
-        print("ERRO informação invalida")
-        return despesas   
-    valor = float(input(f"informe o valor de {nome}:  "))
-    despesas[nome] = valor
-    print(f"despesa {nome} adicionada ")
-    return despesas
-
-def excluir_despesa (despesas):
-    print("1 - excluir uma despesa especifica ")
-    print("2 - excluir todas as despesas ")
-    print("3 - adicionar uma despesa ")
-    opcao = input(" escolha:  ")
-    
-    if opcao=="1":
-        nome = input("informe o nome da despesa: ").lower()
+    try:
+        valor = float(input("Valor (R$): ").strip() or 0)
+    except ValueError:
+        print("Valor inválido. Registrando como 0.")
+        valor = 0
         
-        if nome in despesas:
-            del despesas[nome]
-            print("despesa excluida")
+    financeiro["despesas"].append({"tipo": tipo, "valor": valor})
+    salvar(financeiro)
+    print("Despesa registrada.")
+
+
+def excluir_despesa():
+    financeiro = carregar()
+
+    if not financeiro["despesas"]:
+        print("Nenhuma despesa cadastrada.")
+        return
+
+    print("=== EXCLUIR OU ADICIONAR DESPESA ===")
+    print("1 - Excluir despesa específica")
+    print("2 - Adicionar uma despesa específica (rápido)")
+    print("3 - Excluir todas as despesas")
+    print("0 - Cancelar")
+    op = input("Escolha: ").strip()
+
+    
+    if op == "1":
+        print("Despesas cadastradas:")
+        for i, d in enumerate(financeiro["despesas"]):
+            print(f"{i} - {d['tipo']} | R${d['valor']:.2f}")
+
+        try:
+            indice = int(input("Informe o índice da despesa para excluir: ").strip())
+            if 0 <= indice < len(financeiro["despesas"]):
+                removido = financeiro["despesas"].pop(indice)
+                salvar(financeiro)
+                print(f"Despesa '{removido['tipo']}' removida.")
+            else:
+                print("Índice inválido.")
+        except ValueError:
+            print("Entrada inválida.")
+
+    elif op == "2":
+        tipo = input("Tipo da despesa: ").strip()
+        try:
+            valor = float(input("Valor (R$): ").strip())
+        except ValueError:
+            print("Valor inválido. Registrado como 0.")
+            valor = 0
+
+        financeiro["despesas"].append({"tipo": tipo, "valor": valor})
+        salvar(financeiro)
+        print("Despesa adicionada.")
+
+    elif op == "3":
+        print("ATENÇÃO: Esta operação removerá todas as despesas cadastradas.")
+        confirma = input("Confirma exclusão de todas as despesas? (s/N): ").strip().lower()
+        if confirma == "s" or confirma == "sim":
+            financeiro["despesas"] = []
+            salvar(financeiro)
+            print("Todas as despesas foram removidas.")
         else:
-            print("despesa nao encontrada ")
-    elif opcao=="2":
-        despesas.clear()
-        print("todas as despesas excluidas ")
-        
-    elif opcao=="3":
-        despesas = adicionar_despesa(despesas)
-        
+            print("Operação cancelada. Nenhuma despesa foi removida.")
+
+    elif op == "0":
+        return
     else:
-        print("opcao invalida ")
-        
-    return despesas                        
+        print("Opção inválida.")
 
+
+
+def calcular_total_despesas():
+    financeiro = carregar()
+    total = sum(item["valor"] for item in financeiro["despesas"])
+    print(f"Total despesas: R${total:.2f}")
+    return total
+
+def registrar_custo_producao(qtd):
+    """Usado pelo módulo Operacional para registrar uma produção."""
+    financeiro = carregar()
+    financeiro["producao"].append({"qtd": qtd})
+    salvar(financeiro)
+
+def gerar_relatorio():
+    # IMPORTAÇÕES LOCAIS: Evita dependência circular
+    from rh.rh import carregar as rh_carregar
+    from estoque.estoque import carregar as estoque_carregar
+    from operacional.operacional import carregar as producao_carregar
     
+    financeiro = carregar()
+    print("\n=== RELATÓRIO FINANCEIRO (SIMPLES) ===")
+    
+    total_desp = sum(d["valor"] for d in financeiro["despesas"])
+
+    prods = producao_carregar()
+    total_prod = sum(p.get("qtd", 0) for p in prods)
+
+    funcs = rh_carregar()
+    folha = sum(f.get("salario_bruto", 0) for f in funcs)
+
+    est = estoque_carregar()
+    mat = est.get("insumos", {}).get("material", 0)
+    
+    print("-" * 30)
+    print(f"Total Despesas Registradas: R${total_desp:.2f}")
+    print(f"Total Folha (Bruta/RH): R${folha:.2f}")
+    print(f"Produção Registrada (Peças): {total_prod}")
+    print(f"Insumo 'Material' Restante: {mat}")
+    print("-" * 30)
+
+    if financeiro["despesas"]:
+        print("Despesas detalhadas:")
+        for d in financeiro["despesas"]:
+            print(f" - {d['tipo']}: R${d['valor']:.2f}")
+
 def menu():
-    despesas = {}
-    qtd_carros = 0
-    
     while True:
-        print("====Menu Financeiro====")
-        print("1 - cadastrar despesa")
-        print("2 - gerar relatorio")
-        print("3 - excluir e adicionar")
-        print("4 - sair")
-        opcao = input("Escolha uma opção: ")
-        
-        if opcao == "1":
-            despesas = cadastrar_despesa()
-            qtd_carros = int(input("Quantidade de carros produzidos por mês: "))
-            print("despesa cadastrada")
-            
-        elif opcao == "2":
-            if not despesas:
-                print("despesa não cadastrada.")
-            else:
-                gerar_relatorio(despesas, qtd_carros)
-        elif opcao=="3":
-            if not despesas:
-                print("despesa nao cadastrada ")
-            else:
-                despesas = excluir_despesa(despesas)    
-        
-        elif opcao == "4":
-            print("sair")
-            break
+        print("=== MENU FINANCEIRO ===")
+        print("1 - Cadastrar despesa")
+        print("2 - Mostrar total despesas")
+        print("3 - Gerar relatório")
+        print("4 - Excluir ou adicionar despesa")
+        print("0 - Voltar")
+        op = input("Escolha: ").strip()
+        if op == "1":
+            cadastrar_despesa()
+        elif op == "2":
+            calcular_total_despesas()
+        elif op == "3":
+            gerar_relatorio()
+        elif op == "4":
+            excluir_despesa()
+        elif op == "0":
+            return
         else:
-            print("opção invalida")
+            print("Opção inválida.")
