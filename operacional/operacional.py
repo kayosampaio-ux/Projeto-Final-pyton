@@ -1,138 +1,120 @@
-# Feito por Kayo Dev1 
+import os, json
+from rh.rh import contar_por_turno
+from estoque.estoque import consumir_insumos
+# Importa APENAS a função de registro do financeiro que é usada
+from financeiro.financeiro import registrar_custo_producao
 
-producao = []
+ARQUIVO = "database/producao.json"
 
+# Parâmetros de negócio
+PEÇAS_POR_HORA_POR_FUNC = 8
+HORAS_POR_TURNO = 8
+TURNOS_POR_DIA = 3
 
-from datetime import datetime
+# Garante que o arquivo e pasta existam
+def garantir_arquivo():
+    os.makedirs("database", exist_ok=True)
+    if not os.path.exists(ARQUIVO):
+        with open(ARQUIVO, "w", encoding="utf-8") as f:
+            json.dump([], f)
 
-def cadastrar_producao():
-    while True:
-        data = input("Digite a data (DD.MM.AAAA): ")
-        try:
-            # Tenta converter a string em data
-            dia, mes, ano = map(int, data.split("."))
-            data_obj = datetime(ano, mes, dia)
-            break  # data válida
-        except ValueError:
-            print("Data inválida! Verifique o dia ou o mês.")
+# Carrega a lista de produções
+def carregar():
+    garantir_arquivo()
+    with open(ARQUIVO, "r", encoding="utf-8") as f:
+        return json.load(f)
 
-    turnos_validos = ["manhã", "tarde", "noite"]
-    while True:
-        turno = input("Digite o turno (manhã, tarde, noite): ").lower()
-        if turno in turnos_validos:
-            break
-        else:
-            print("Turno inválido! Apenas 'manhã', 'tarde' ou 'noite' são permitidos.")
+# Salva lista atualizada
+def salvar(lista):
+    with open(ARQUIVO, "w", encoding="utf-8") as f:
+        json.dump(lista, f, indent=2, ensure_ascii=False)
 
-    print(f"Produção cadastrada com sucesso: {data_obj.strftime('%d.%m.%Y')} - Turno: {turno}")
+def capacidade_por_turno():
+    cont = contar_por_turno()  
+    cap = {}
+    for t in ("manha","tarde","noite"):
+        
+        cap[t] = cont.get(t,0) * HORAS_POR_TURNO * PEÇAS_POR_HORA_POR_FUNC
+    return cap
+
+def cadastrar():
+    producoes = carregar()
+    cap = capacidade_por_turno()
+    print("\n=== Cadastrar Produção ===")
     
-def excluir_producao():
-    print("\n=== EXCLUIR UMA PRODUÇÃO ===")
-
-    if not producao:
-        print("Nenhuma produção cadastrada.")
+    turno = input("Turno (manha/tarde/noite): ").strip().lower()
+    if turno not in ("manha","tarde","noite"):
+        print("Turno inválido. Cadastro cancelado.")
         return
-
-    dia = input("Dia da produção a excluir: ")
-    turno = input("Turno (manhã/tarde/noite): ").lower()
-
-    for p in producao:
-        if p["dia"] == dia and p["turno"] == turno:
-            print("\nProdução encontrada:")
-            print(f"Dia: {p['dia']}")
-            print(f"Turno: {p['turno']}")
-            print(f"Quantidade: {p['quantidade']}")
-
-            confirmar = input("Excluir esta produção? (s/n): ").lower()
-            if confirmar == "s":
-                producao.remove(p)
-                print("Produção excluída!")
-            else:
-                print("Exclusão cancelada.")
-            return
-
-    print("Nenhuma produção encontrada.")
-
-
-def calcular_total_semanal():
-    if not producao:
-        print("\nNenhuma produção cadastrada.")
-        return None
-
-    print("\n=== CALCULAR TOTAL SEMANAL ===")
-    semana = input("Digite o número da semana: ")
-
+        
+    capacidade_max = cap.get(turno, 0)
+    print(f"Capacidade estimada para este turno: {capacidade_max} peças")
+    
     try:
-        semana = int(semana)
-    except:
-        print("Semana inválida! Digite apenas números.")
-        return None
-
-    total = 0
-    for prod in producao:
-        if prod["semana"] == semana:
-            total += prod["quantidade"]
-
-    if total == 0:
-        print(f"Nenhuma produção encontrada na semana {semana}.")
-    else:
-        print(f"Total produzido na semana {semana}: {total} unidades.")
-
-    return total 
-
-
-def calcular_media_por_dia():
-    if not producao:
-        print("\nNenhuma produção cadastrada.")
+        qtd = int(input("Quantidade produzida: ").strip())
+        if qtd < 0: raise ValueError
+    except ValueError:
+        print("Quantidade inválida. Cadastro cancelado.")
         return
 
-    print("\n=== CALCULAR MÉDIA POR DIA ===")
-    dia = input("Digite o dia (ex: 12/03/2025): ")
-
-    valores = [p["quantidade"] for p in producao if p["dia"] == dia]
-
-    if not valores:
-        print(f"Nenhuma produção cadastrada no dia {dia}.")
+    
+    if qtd > capacidade_max:
+        print("ATENÇÃO: Quantidade maior que a capacidade estimada. Confirmar? (s/n)")
+        if input().strip().lower() != "s":
+            print("Cadastro cancelado.")
+            return
+            
+    
+    faltou = consumir_insumos(qtd)
+    if faltou:
+        print("Estoque insuficiente. Não foi possível registrar a produção.")
         return
+        
+    registro = {"turno": turno, "qtd": qtd, "dia": input("Data (ex 12/03/2025): ").strip()}
+    producoes.append(registro)
+    salvar(producoes)
+    
+    
+    try:
+        registrar_custo_producao(qtd)
+    except Exception as e:
+        print(f"Aviso: Não foi possível registrar no Financeiro: {e}")
+        
+    print("✔ Produção registrada e estoque atualizado.")
 
-    media = sum(valores) / len(valores)
-    print(f"\nA média no dia {dia} foi de {media:.2f} unidades.")
-
-
-
-def calcular_media_por_turno():
-    if not producao:
-        print("\nNenhuma produção cadastrada.")
+def listar():
+    producoes = carregar()
+    if not producoes:
+        print("Nenhuma produção registrada.")
         return
+    print("\n=== Produções Registradas ===")
+    for r in producoes:
+        print(f"{r['dia']} - {r['turno']} - {r['qtd']} peças")
 
-    print("\n=== CALCULAR MÉDIA POR TURNO ===")
-    turno = input("Turno (manhã/tarde/noite): ").lower()
+def total_registrado():
+    producoes = carregar()
+    total = sum(p['qtd'] for p in producoes)
+    print(f"Total de peças registradas: {total}")
+    return total
 
-    valores = [p["quantidade"] for p in producao if p["turno"] == turno]
-
-    if not valores:
-        print(f"Nenhuma produção encontrada no turno '{turno}'.")
-        return
-
-    media = sum(valores) / len(valores)
-    print(f"Média do turno '{turno}': {media:.2f} unidades.")
-
-
-def simular_mensal_anual():
-    if not producao:
-        print("\nNenhuma produção cadastrada.")
-        return
-
-    print("\n=== SIMULAÇÃO MENSAL E ANUAL ===")
-
-    quantidades = [p["quantidade"] for p in producao]
-    media_geral = sum(quantidades) / len(quantidades)
-
-    simulacao_mensal = media_geral * 30
-    simulacao_anual = media_geral * 365
-
-    print(f"Média diária geral: {media_geral:.2f}")
-    print(f"Produção estimada mensal: {simulacao_mensal:.2f}")
-    print(f"Produção estimada anual: {simulacao_anual:.2f}")
-
-
+def menu():
+    while True:
+        print("\n--- MENU OPERACIONAL ---")
+        print("1 - Cadastrar produção")
+        print("2 - Listar produções")
+        print("3 - Capacidade por turno")
+        print("4 - Total registrado")
+        print("0 - Voltar")
+        op = input("Escolha: ").strip()
+        if op == "1":
+            cadastrar()
+        elif op == "2":
+            listar()
+        elif op == "3":
+            print(capacidade_por_turno())
+        elif op == "4":
+            total_registrado()
+        elif op == "0":
+            return
+        else:
+            print("Opção inválida.")
