@@ -1,8 +1,8 @@
 import os, json
-from rh.rh import contar_por_turno
-from estoque.estoque import consumir_insumos
+from rh import contar_por_turno
+from estoque import consumir_insumos
 # Importa APENAS a função de registro do financeiro que é usada
-from financeiro.financeiro import registrar_custo_producao
+from financeiro import registrar_custo_producao
 
 ARQUIVO = "database/producao.json"
 

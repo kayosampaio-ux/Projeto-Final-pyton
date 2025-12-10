@@ -1,8 +1,8 @@
 # main.py - versão simples integrada (mini-ERP iniciante)
-from rh.rh import menu as menu_rh
-from operacional.operacional import menu as menu_operacional
-from estoque.estoque import menu as menu_estoque
-from financeiro.financeiro import menu as menu_financeiro
+from rh import menu as menu_rh
+from operacional import menu as menu_operacional
+from estoque import menu as menu_estoque
+from financeiro import menu as menu_financeiro
 
 def main():
     while True:
@@ -29,5 +29,5 @@ def main():
         else:
             print("Opção inválida.")
 
-if _name_ == "_main_":
+if __name__ == "_main_":
     main()

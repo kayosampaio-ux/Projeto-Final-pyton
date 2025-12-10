@@ -113,9 +113,9 @@ def registrar_custo_producao(qtd):
 
 def gerar_relatorio():
     # IMPORTAÇÕES LOCAIS: Evita dependência circular
-    from rh.rh import carregar as rh_carregar
-    from estoque.estoque import carregar as estoque_carregar
-    from operacional.operacional import carregar as producao_carregar
+    from rh import carregar as rh_carregar
+    from estoque import carregar as estoque_carregar
+    from operacional import carregar as producao_carregar
     
     financeiro = carregar()
     print("\n=== RELATÓRIO FINANCEIRO (SIMPLES) ===")
