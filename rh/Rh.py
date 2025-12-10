@@ -1,135 +1,104 @@
-import json
+# rh/rh.py - módulo simples de RH 
+#Dev Ezequiel
+import os, json
 
-arquivo = "funcionarios.json"
+ARQUIVO = "database/funcionarios.json"
 
+# Garante que o arquivo e pasta existam
+def garantir_arquivo():
+    os.makedirs("database", exist_ok=True)
+    if not os.path.exists(ARQUIVO):
+        with open(ARQUIVO, "w", encoding="utf-8") as f:
+            json.dump([], f)
+
+# Carrega a lista de funcionários
 def carregar():
-    try: with open(arquivo,'r',encoding= "utf-8") as f:
+    garantir_arquivo()
+    with open(ARQUIVO, "r", encoding="utf-8") as f:
         return json.load(f)
-    except:
-        return[]
-    
-def salvar(lista):  
-    with open(arquivo,"w",enconding = "utf-8") as f:
-        json.dump(lista,f,indent = 2)
+
+# Salva lista atualizada
+def salvar(lista):
+    with open(ARQUIVO, "w", encoding="utf-8") as f:
+        json.dump(lista, f, indent=2, ensure_ascii=False)
 
 def cadastrar():
-    lista = carregar()
-        print("\n=== CADASTRAR FUNCIONÁRIO===")
-        nome = input("nome")
-        cpf = input("CPF:")
-        turno = input("Turno(Manhã/Tarde/Noite):")
-        salario = float(input("Salário"))
-        
-        novo = {
-            "id":len(lista)
-            "nome":nome,
-            "cpf":cpf,
-            "turno":turno,
-            "salario":salario
-        }
-        
-lista.append(novo)
-salvar(lista)
-print("Funcionário cadastrado!\n")
+    funcionarios = carregar()
+    print("\n=== Cadastrar Funcionário ===")
+    nome = input("Nome: ").strip()
+    cpf = input("CPF: ").strip()
+    
+    turno = input("Turno (manha/tarde/noite): ").strip().lower()
+    if turno not in ("manha","tarde","noite"):
+        print("Turno inválido, cadastrando como 'manha'.")
+        turno = "manha"
+    
+    try:
+        salario = float(input("Salário bruto mensal (R$): ").strip() or 0)
+    except ValueError:
+        print("Valor inválido. Registrando salário como 0.")
+        salario = 0
+
+    funcionarios.append({
+        "id": len(funcionarios)+1,
+        "nome": nome,
+        "cpf": cpf,
+        "turno": turno,
+        "salario_bruto": salario
+    })
+    salvar(funcionarios)
+    print("✔ Funcionário cadastrado.")
 
 def listar():
-    lista = carregar()
-    print("\n=== LiSTA DE FUNCIONÁRIOS===")
-    if len(lista ==0:)
-    print("Nenhum funcionário cadastrado.")
-    else:
-        print(f"id:{f["id"]} | {f["nome"]}) | CPF:{f["cpf"]} | Turno: {f["turno"]} | {f["salario"]}")
-    print()
-    
-def buscar ():
-    lista = carregar()
-    nome = input("\n Digite o nome para Buscar: ").lower()
-    achou = false
-    
-    for f in lista:
-        if nome in f["nome"].lower():
-            print(f "ID:{f["id"]} - {f["nome"]} - {f["turno"]} - {f["salario"]}")
-            achou = True 
-        if not achou:
-            print ("Nenhum Funcionário encontrado.\n")
-            
-    print()
-    
-    def editar ():
-        lista = carregar()
-        listar()
-        
-        try:
-            id_escolhido = int(input("ID para editar: "))
-        except:
-            print("ID inválido.\n")
+    funcionarios = carregar()
+    if not funcionarios:
+        print("Nenhum funcionário registrado.")
+        return
+    print("\n=== Funcionários Cadastrados ===")
+    for f in funcionarios:
+        print(f"ID:{f['id']} - {f['nome']} - Turno:{f['turno']} - Salário:R${f['salario_bruto']:.2f}")
+
+def contar_por_turno():
+    funcionarios = carregar()
+    cont = {"manha":0,"tarde":0,"noite":0}
+    for f in funcionarios:
+        t = f.get("turno","manha")
+        if t in cont:
+            cont[t] += 1
+    return cont
+
+def folha():
+    funcionarios = carregar()
+    if not funcionarios:
+        print("Nenhum funcionário para calcular folha.")
+        return 0
+    total = 0
+    print("\n=== Folha Salarial (Simples) ===")
+    for f in funcionarios:
+        bruto = f.get("salario_bruto",0)
+        print(f"{f['nome']}: bruto R${bruto:.2f}")
+        total += bruto
+    print(f"\nTotal folha (bruta): R${total:.2f}")
+    return total
+
+def menu():
+    while True:
+        print("\n--- MENU RH ---")
+        print("1 - Cadastrar")
+        print("2 - Listar")
+        print("3 - Contagem por turno")
+        print("4 - Folha")
+        print("0 - Voltar")
+        op = input("Escolha: ").strip()
+        if op == "1":
+            cadastrar()
+        elif op == "2":
+            listar()
+        elif op == "3":
+            print(contar_por_turno())
+        elif op == "4":
+            folha()
+        elif op == "0":
             return
-        
-        for f in lista:
-            if f["id"] == id_escolhido:
-                print("Deixe Vazio para manter o valor atual.\n")
-            nome = input("Nome novo: ")
-            cpf = input("CPF novo : ")
-            turno = input("Turno novo: ")
-            salario = input("Salário novo: ")   
-        
-        if nome ! = "":
-            f["nome"] = nome
-        if cpf ! = "":
-            f["cpf"] = cpf
-        if turno ! = "":
-            f["turno"] = turno
-        if salario ! = "":
-            f["salario"] = float(salario)
-            
-            salvar(lista)
-            print("Editado com sucesso\n")
-            return
-        print ("ID não encontrado.\n")
-        
-        def remover():
-            lista = carregar()
-            lista()
-            
-            try: 
-                id_escolhido = int(input("ID para remover:))
-            except:
-            print("ID inválido.\n")
-            return
-            
-        nova_lista = []
-        removido = false
-        for f in lista:
-        if f["id"] == id_escolhido:
-         removido = true
-        else nova_lista.append(f)
-         
-        nova_lista.append(f)
-        if removido:
-        salvar(nova_lista)
-        print("Funcionário removido!\n")
-        else: 
-        print("ID não encontrado.")
-        
-        def contar_por_turno():
-        lista = carregar ()
-        cont = {"manha":0,"tarde":0,"noite":0}
-        
-        for f in lista: turno = f ["turno"]
-        if turno in cont:
-        cont[turno] + = 1
-        
-        print("\n===CONTAGEM POR TURNO===")
-        print(cont)
-        print()
-        
-        def folha():
-        lista = carregar ()
-        print("\n===FOLHA SALARIAL===")
-        total = 0
-        
-    for f in lista:
-    print(f"{f["nome"]} - R${f["salario"]}")
-    total + = f["salario"]
-    
-    print("\nTotal da Folha: R$",total,"\n")
+        else:
+            print("Opção inválida.")
