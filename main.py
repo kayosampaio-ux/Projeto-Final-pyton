@@ -1,6 +1,7 @@
 # main.py - versão simples integrada (mini-ERP iniciante)
+# Mude: 'from rh import menu' para 'from rh.rh import menu'
 from rh import menu as menu_rh
-from operacional import menu as menu_operacional
+from operacional.operacional import menu as menu_operacional
 from estoque import menu as menu_estoque
 from financeiro import menu as menu_financeiro
 
