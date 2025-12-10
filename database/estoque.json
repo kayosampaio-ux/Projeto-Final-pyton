@@ -1,6 +1,13 @@
 {
   "insumos": {
-    "material": 955
+    "material": 847
   },
-  "produtos": []
+  "produtos": [
+    {
+      "codigo": "3",
+      "nome": "sabao",
+      "quantidade": 0,
+      "valor_compra": 0
+    }
+  ]
 }
