@@ -1,0 +1,9 @@
+[
+  {
+    "id": 1,
+    "nome": "kayo",
+    "cpf": "123.456.78-9",
+    "turno": "manha",
+    "salario_bruto": 5000.0
+  }
+]
